@@ -42,13 +42,12 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   io.File imageFile;
   FirebaseVisionImage visionImage;
+  FaceDetector faceDetector;
 
   CameraController controller;
   List cameras;
   int selectedCameraIdx;
   String imagePath;
-
-  FaceDetector faceDetector;
 
   bool started = false;
 
@@ -202,7 +201,7 @@ class _MyHomePageState extends State<MyHomePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Click To Share'),
+        title: Text('Firebase + Machine Learning'),
         backgroundColor: Colors.blueGrey,
       ),
       body: Container(
@@ -278,25 +277,6 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
-  void _capture() async {
-    try {
-      // 1
-      final path = join(
-        (await getTemporaryDirectory()).path,
-        '${DateTime.now()}.png',
-      );
-      // 2
-      await controller.takePicture(path);
-      // 3
-      io.File file = io.File(path);
-      _faceDetector(file);
-
-      //classifyImage(file);
-    } catch (e) {
-      print(e);
-    }
-  }
-
   Widget _cameraTogglesRowWidget() {
     if (cameras == null || cameras.isEmpty) {
       return Spacer();
@@ -322,6 +302,25 @@ class _MyHomePageState extends State<MyHomePage> {
     selectedCameraIdx < cameras.length - 1 ? selectedCameraIdx + 1 : 0;
     CameraDescription selectedCamera = cameras[selectedCameraIdx];
     _initCameraController(selectedCamera);
+  }
+
+  void _capture() async {
+    try {
+      // 1
+      final path = join(
+        (await getTemporaryDirectory()).path,
+        '${DateTime.now()}.png',
+      );
+      // 2
+      await controller.takePicture(path);
+      // 3
+      io.File file = io.File(path);
+      _faceDetector(file);
+
+      //classifyImage(file);
+    } catch (e) {
+      print(e);
+    }
   }
 
   IconData _getCameraLensIcon(CameraLensDirection direction) {
