@@ -133,11 +133,6 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  Future<io.File> getImageFile() async {
-    var image = await ImagePicker.pickImage(source: ImageSource.camera);
-    return image;
-  }
-
   // Classifiy the image selected
   /*classifyImage(io.File image) async {
     var output = await Tflite.runModelOnImage(
