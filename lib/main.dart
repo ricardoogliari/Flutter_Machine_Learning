@@ -54,12 +54,12 @@ class _MyHomePageState extends State<MyHomePage> {
   int statusLight = 0;
 
   //Load the Tflite model
-  /*loadModel() async {
+  loadModel() async {
     await Tflite.loadModel(
       model: "assets/model_unquant.tflite",
       labels: "assets/labels.txt",
     );
-  }*/
+  }
 
   Future<String> sendData() async {
     http.Response response = await http.get(
@@ -73,19 +73,13 @@ class _MyHomePageState extends State<MyHomePage> {
   void initState() {
     super.initState();
 
-    /*loadModel().then((value) {
-      setState(() {
-        _loading = false;
-      });
-    });*/
+    loadModel();
 
-    // 1
     availableCameras().then((availableCameras) {
 
       cameras = availableCameras;
       if (cameras.length > 0) {
         setState(() {
-          // 2
           selectedCameraIdx = 0;
         });
 
@@ -94,24 +88,18 @@ class _MyHomePageState extends State<MyHomePage> {
         print("No camera available");
       }
     }).catchError((err) {
-      // 3
       print('Error: $err.code\nError Message: $err.message');
     });
   }
 
-  // 1, 2
   Future _initCameraController(CameraDescription cameraDescription) async {
     if (controller != null) {
       await controller.dispose();
     }
 
-    // 3
     controller = CameraController(cameraDescription, ResolutionPreset.high);
 
-    // If the controller is updated then update the UI.
-    // 4
     controller.addListener(() {
-      // 5
       if (mounted) {
         setState(() {});
       }
@@ -121,7 +109,6 @@ class _MyHomePageState extends State<MyHomePage> {
       }
     });
 
-    // 6
     try {
       await controller.initialize();
     } on CameraException catch (e) {
@@ -134,7 +121,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   // Classifiy the image selected
-  /*classifyImage(io.File image) async {
+  classifyImage(io.File image) async {
     var output = await Tflite.runModelOnImage(
       path: image.path,
       numResults: 2,
@@ -144,11 +131,14 @@ class _MyHomePageState extends State<MyHomePage> {
     );
 
     print('sucess');
-  }*/
+  }
 
   void _faceDetector(io.File imageFile) async{
+    //1 - cria uma instância de FirebaseVisionImage a partir de um arquivo (instância de File)
     visionImage = FirebaseVisionImage.fromFile(imageFile);
 
+    //2 - se o FaceDetecetor (variável criada na classe) ainda não foi instanciada, será instanciada
+    //3 - passamos um FaceDetectorOptions como parâmetro para detalhar quais features queremos no detector de faces. Por exemplo, pra saber a probabilidade da pessoa estar rindo ou não, o enableClassification deve estar marcado como true.
     if (faceDetector == null) {
       faceDetector = FirebaseVision.instance.faceDetector(FaceDetectorOptions(
           enableClassification: true,
@@ -157,14 +147,18 @@ class _MyHomePageState extends State<MyHomePage> {
           enableContours: true
       ));
     }
+
+    //4 - o detector de faces processa a imagem e retorna uma lista com as faces encontradas. A lista pode ter 0 (zero) elementos.
     final List<Face> faces = await faceDetector.processImage(visionImage);
 
-    print("faces: ${faces.length}");
+    //5 - um laço for nas faces é feito
     for (Face face in faces) {
 
+      //6 - verificamos se o smilingProbability está diferente de nulo. Seu valor vai de 0.0 (0% de probabilidade de riso) até 1.0 (100% de probabilidade de riso)
       if (face.smilingProbability != null) {
         final double smileProb = face.smilingProbability;
 
+        //7 - mudamos o valor do statusLight e depois enviamos isso para um Arduino Uno, que vai ligar ou desligar a lâmpada de balada
         if (statusLight == 0){
           if (smileProb > 0.85) {
             statusLight = 1;
@@ -176,11 +170,11 @@ class _MyHomePageState extends State<MyHomePage> {
             sendData();
           }
         }
-        print("smileProb: ${smileProb}");
       }
 
     }
 
+    //8 - depois de um tempo muito curto, capturamos outra foto e o processo é reiniciado
     Future.delayed(Duration(seconds: 1), (){
       _capture();
     });
@@ -208,6 +202,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 flex: 1,
                 child: _cameraPreviewWidget(),
               ),
+              //(2) mostrar uma widget ou outra
               started ? Container() :
               Column(
                 children: <Widget>[
@@ -264,6 +259,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     started = true;
                   });
 
+                  //(1) vai começar a captura
                   _capture();
                 })
           ],
@@ -299,25 +295,6 @@ class _MyHomePageState extends State<MyHomePage> {
     _initCameraController(selectedCamera);
   }
 
-  void _capture() async {
-    try {
-      // 1
-      final path = join(
-        (await getTemporaryDirectory()).path,
-        '${DateTime.now()}.png',
-      );
-      // 2
-      await controller.takePicture(path);
-      // 3
-      io.File file = io.File(path);
-      _faceDetector(file);
-
-      //classifyImage(file);
-    } catch (e) {
-      print(e);
-    }
-  }
-
   IconData _getCameraLensIcon(CameraLensDirection direction) {
     switch (direction) {
       case CameraLensDirection.back:
@@ -330,4 +307,21 @@ class _MyHomePageState extends State<MyHomePage> {
         return Icons.device_unknown;
     }
   }
+
+  void _capture() async {
+    try {
+      final path = join(
+        (await getTemporaryDirectory()).path,
+        '${DateTime.now()}.png',
+      );
+
+      await controller.takePicture(path);
+
+      io.File file = io.File(path);
+      _faceDetector(file);
+    } catch (e) {
+      print(e);
+    }
+  }
+
 }
