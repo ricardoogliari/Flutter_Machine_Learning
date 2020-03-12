@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "273013428877",
+    "firebase_url": "https://fir-machine-learning-c22e3.firebaseio.com",
+    "project_id": "fir-machine-learning-c22e3",
+    "storage_bucket": "fir-machine-learning-c22e3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:273013428877:android:98b7d3f59ebeb95b1c08c4",
+        "android_client_info": {
+          "package_name": "gok.study.com.flutter_app_machine_learning"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "273013428877-1e82eu0cqt7pthn0b8osajs4v2fmu6mb.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDBqTg91wekrniS4EF7M6FUJfBM1lEvn5o"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "273013428877-1e82eu0cqt7pthn0b8osajs4v2fmu6mb.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
